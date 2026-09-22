@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mon Coach — Prise de Masse</title>
+<!-- Importation de Chart.js pour la courbe -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+/* =========================================================
+   VARIABLES
+========================================================= */
+:root {
+    --bg: #090b10;
+    --bg-soft: #0f1219;
+    --card: #131720;
+    --card-hover: #181d28;
+    --border: #252b38;
+
+    --primary: #5b8cff;
+    --primary-dark: #416fe0;
+    --primary-light: #8aacff;
+
+    --success: #20d49a;
+    --danger: #ff5c6c;
+    --warning: #ffb84d;
+    --info: #36b8ff;
+
+    --text: #f5f7fb;
+    --text-light: #8992a4;
+    --text-muted: #626b7c;
+
+    --radius: 18px;
+    --radius-small: 11px;
+    --sidebar-width: 245px;
+}
+
+/* =========================================================
+   RESET & BASE
+========================================================= */
+* { box-sizing: border-box; }
+html, body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    margin: 0;
+    font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+    background: radial-gradient(circle at 10% 0%, rgba(91,140,255,.10), transparent 28%),
+                radial-gradient(circle at 100% 100%, rgba(32,212,154,.06), transparent 25%),
+                var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+}
+
+/* =========================================================
+   TOAST NOTIFICATIONS
+========================================================= */
+#toast-container {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.toast {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 12px 18px;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.3);
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: slideIn .3s ease, fadeOut .3s ease 2.7s forwards;
+}
+.toast.success { border-left: 4px solid var(--success); }
+.toast.error { border-left: 4px solid var(--danger); }
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeOut {
+    to { opacity: 0; transform: translateY(-10px); }
+}
+
+/* =========================================================
+   LAYOUT & SIDEBAR
+========================================================= */
+.app { display: flex; min-height: 100vh; }
+.sidebar {
+    width: var(--sidebar-width);
+    background: linear-gradient(180deg, #10131b 0%, #0b0e14 100%);
+    border-right: 1px solid var(--border);
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    padding: 25px 16px;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+}
+.logo {
+    display: flex; align-items: center; gap: 12px; padding: 5px 10px 30px;
+}
+.logo-icon {
+    width: 42px; height: 42px; border-radius: 13px;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, var(--primary), #7b61ff);
+    box-shadow: 0 8px 25px rgba(91,140,255,.25);
+    font-size: 21px;
+}
+.logo-text { font-weight: 800; letter-spacing: -.5px; }
+.logo-text span { display: block; color: var(--primary-light); font-size: 12px; margin-top: 2px; font-weight: 500; }
+
+.nav-title {
+    color: var(--text-muted); text-transform: uppercase; font-size: 10px; letter-spacing: 1.5px; font-weight: 700;
+    padding: 0 12px; margin: 8px 0 10px;
+}
+.nav { display: flex; flex-direction: column; gap: 5px; }
+.tab-btn {
+    width: 100%; display: flex; align-items: center; gap: 12px; padding: 12px 13px;
+    border: 1px solid transparent; border-radius: 12px; background: transparent; color: var(--text-light);
+    cursor: pointer; font-size: 14px; font-weight: 600; transition: .2s ease; text-align: left;
+}
+.tab-btn:hover { background: rgba(255,255,255,.04); color: var(--text); }
+.tab-btn.active {
+    color: white; background: linear-gradient(90deg, rgba(91,140,255,.18), rgba(91,140,255,.05));
+    border-color: rgba(91,140,255,.18); box-shadow: inset 3px 0 0 var(--primary);
+}
+.nav-icon { width: 24px; text-align: center; font-size: 18px; }
+
+.sidebar-footer {
+    margin-top: auto; padding: 15px 12px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 11px; line-height: 1.5;
+}
+
+/* =========================================================
+   MAIN CONTENT
+========================================================= */
+.main {
+    margin-left: var(--sidebar-width);
+    width: calc(100% - var(--sidebar-width));
+    padding: 32px 35px 50px;
+}
+.main-inner { max-width: 1250px; margin: auto; }
+
+.top-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 28px; }
+.page-title { margin: 0; font-size: 29px; font-weight: 800; letter-spacing: -.8px; }
+.page-subtitle { margin: 7px 0 0; color: var(--text-light); font-size: 14px; }
+.header-badge {
+    padding: 8px 13px; background: rgba(32,212,154,.08); border: 1px solid rgba(32,212,154,.15);
+    color: var(--success); border-radius: 999px; font-size: 12px; font-weight: 700;
+}
+
+.section { display: none; }
+.section.active { display: block; animation: fadeIn .25s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+/* =========================================================
+   CARDS & STATS
+========================================================= */
+.card {
+    background: linear-gradient(145deg, rgba(255,255,255,.025), rgba(255,255,255,.008)), var(--card);
+    border: 1px solid var(--border); border-radius: var(--radius); padding: 23px; margin-bottom: 20px;
+    box-shadow: 0 15px 45px rgba(0,0,0,.16);
+}
+.card h2 { margin: 0 0 7px; font-size: 18px; letter-spacing: -.3px; }
+.card-description { color: var(--text-light); font-size: 13px; margin-bottom: 20px; }
+
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
+.stat-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 18px; position: relative; overflow: hidden;
+}
+.stat-card::after {
+    content: ""; position: absolute; width: 80px; height: 80px; border-radius: 50%; right: -30px; bottom: -30px; background: rgba(91,140,255,.08);
+}
+.stat-icon { font-size: 20px; margin-bottom: 13px; }
+.stat-value { font-size: 22px; font-weight: 800; }
+.stat-label { color: var(--text-light); font-size: 11px; margin-top: 4px; }
+
+/* =========================================================
+   TABLES & INPUTS
+========================================================= */
+.table-wrapper { overflow-x: auto; }
+table { width: 100%; border-collapse: separate; border-spacing: 0 7px; min-width: 450px; }
+th { color: var(--text-muted); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; padding: 7px 13px; text-align: left; }
+td { padding: 14px 13px; background: #10141c; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); font-size: 13px; }
+td:first-child { border-left: 1px solid var(--border); border-radius: 11px 0 0 11px; }
+td:last-child { border-right: 1px solid var(--border); border-radius: 0 11px 11px 0; }
+.day-label { font-weight: 800; color: var(--primary-light); }
+.group-label { color: var(--text-light); }
+
+input[type="text"], input[type="number"], input[type="date"], input[type="file"], select {
+    width: 100%; padding: 10px 12px; border-radius: 9px; border: 1px solid var(--border);
+    background: #0b0e14; color: var(--text); outline: none; font-family: inherit; transition: .2s; font-size: 14px;
+}
+input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(91,140,255,.10); }
+
+/* =========================================================
+   COMPONENTS
+========================================================= */
+.day-selector { display: flex; gap: 7px; overflow-x: auto; padding-bottom: 7px; margin-bottom: 20px; }
+.day-btn {
+    flex-shrink: 0; padding: 9px 15px; border-radius: 999px; border: 1px solid var(--border);
+    background: #0e1219; color: var(--text-light); cursor: pointer; font-weight: 600; transition: .2s;
+}
+.day-btn:hover { border-color: #3b465b; color: white; }
+.day-btn.active { background: var(--primary); border-color: var(--primary); color: white; box-shadow: 0 7px 20px rgba(91,140,255,.2); }
+
+.meal-box { background: #0e1219; border: 1px solid var(--border); border-radius: 13px; padding: 15px; margin-bottom: 10px; position: relative; }
+.meal-box::before { content: ""; position: absolute; left: 0; top: 12px; bottom: 12px; width: 3px; background: var(--primary); border-radius: 0 5px 5px 0; }
+.meal-title { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; font-size: 13px; font-weight: 800; }
+.meal-icon { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: rgba(91,140,255,.1); border-radius: 8px; }
+
+.shopping-layout { display: grid; grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr); gap: 18px; }
+.shopping-item { display: flex; align-items: center; gap: 12px; padding: 12px 13px; background: #0e1219; border: 1px solid var(--border); border-radius: 11px; margin-bottom: 7px; transition: .2s; }
+.shopping-left { display: flex; align-items: center; gap: 11px; flex-grow: 1; min-width: 0; }
+.shopping-item.checked span { text-decoration: line-through; color: var(--text-muted); }
+
+.action-btn { border: none; background: transparent; cursor: pointer; border-radius: 8px; padding: 7px; font-size: 15px; transition: .2s; }
+.delete-btn { color: var(--danger); }
+.delete-btn:hover { background: rgba(255,92,108,.1); }
+.add-stock-btn { color: var(--success); }
+.add-stock-btn:hover { background: rgba(32,212,154,.1); }
+
+.stock-box { background: linear-gradient(145deg, rgba(91,140,255,.04), rgba(255,255,255,.01)); border: 1px solid var(--border); border-radius: 15px; padding: 17px; }
+.stock-box h3 { margin: 0 0 4px; font-size: 15px; }
+.stock-description { color: var(--text-muted); font-size: 11px; margin-bottom: 13px; }
+.stock-item { display: flex; align-items: center; gap: 6px; background: #0c1016; border: 1px solid var(--border); border-radius: 9px; padding: 5px 7px; margin-bottom: 6px; }
+.stock-left { flex: 1; }
+.stock-actions { display: flex; gap: 2px; }
+.add-item-box { display: flex; gap: 7px; margin-top: 10px; }
+.add-item-box button { flex-shrink: 0; padding: 9px 13px; background: var(--success); color: #04150f; border: none; border-radius: 9px; font-weight: 800; cursor: pointer; }
+
+/* RECIPES */
+.search-box { position: relative; margin-bottom: 18px; }
+.search-box input { padding-left: 40px; }
+.search-box::before { content: "⌕"; position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 19px; z-index: 2; }
+
+.recipe-card { display: flex; gap: 17px; background: #0e1219; border: 1px solid var(--border); border-radius: 15px; padding: 14px; margin-bottom: 11px; transition: .2s; }
+.recipe-image-container { width: 135px; height: 135px; flex-shrink: 0; background: linear-gradient(135deg, #171c26, #0c1016); border-radius: 11px; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); }
+.recipe-image-container img { width: 100%; height: 100%; object-fit: cover; }
+.recipe-image-placeholder { color: var(--text-muted); font-size: 11px; text-align: center; padding: 10px; }
+.recipe-content { flex-grow: 1; min-width: 0; }
+.recipe-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.recipe-title { font-weight: 800; color: var(--text); font-size: 15px; }
+.recipe-ingredients { padding: 10px 12px; border-radius: 10px; background: #0a0e14; border: 1px solid #202632; margin-bottom: 11px; }
+.recipe-ing-item { display: flex; align-items: center; gap: 9px; margin-bottom: 7px; font-size: 12px; color: var(--text-light); }
+.recipe-buttons { display: flex; gap: 7px; flex-wrap: wrap; }
+
+.btn-primary-custom, .btn-success-custom, .btn-info-custom {
+    border: none; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-family: inherit; font-size: 12px; font-weight: 700; transition: .2s;
+}
+.btn-primary-custom { background: var(--primary); color: white; }
+.btn-success-custom { background: var(--success); color: #04150f; }
+.btn-info-custom { background: rgba(54,184,255,.1); color: var(--info); border: 1px solid rgba(54,184,255,.15); }
+
+.recipe-info-panel { display: none; background: rgba(54,184,255,.06); border: 1px solid rgba(54,184,255,.15); padding: 13px; border-radius: 10px; margin-bottom: 10px; font-size: 12px; color: #9cddff; }
+.recipe-info-panel.active { display: block; animation: fadeIn .2s ease; }
+
+.new-recipe-box { margin-top: 28px; border-top: 1px solid var(--border); padding-top: 22px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.form-label { display: block; color: var(--text-muted); font-size: 11px; margin-bottom: 5px; }
+
+/* =========================================================
+   RESPONSIVE MOBILE
+========================================================= */
+@media (max-width: 900px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .shopping-layout { grid-template-columns: 1fr; }
+}
+@media (max-width: 700px) {
+    :root { --sidebar-width: 0px; }
+    .sidebar {
+        position: fixed; left: 0; right: 0; top: auto; bottom: 0; width: 100%; height: auto; min-height: 68px;
+        padding: 7px 8px calc(7px + env(safe-area-inset-bottom)); border-top: 1px solid var(--border);
+        background: rgba(11,14,20,.96); backdrop-filter: blur(14px); flex-direction: row; align-items: center; justify-content: center; z-index: 1000;
+    }
+    .logo, .nav-title, .sidebar-footer { display: none; }
+    .nav { width: 100%; display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; }
+    .tab-btn { flex-direction: column; justify-content: center; align-items: center; gap: 3px; font-size: 9px; text-align: center; padding: 7px 2px; }
+    .main { width: 100%; margin-left: 0; padding: 18px 12px calc(92px + env(safe-area-inset-bottom)); }
+    .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .recipe-card { flex-direction: column; }
+    .recipe-image-container { width: 100%; height: 185px; }
+    .form-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div id="toast-container"></div>
+
+<div class="app">
+    <aside class="sidebar">
+        <div class="logo">
+            <div class="logo-icon">💪</div>
+            <div class="logo-text">MON COACH<span>PRISE DE MASSE</span></div>
+        </div>
+        <div class="nav-title">Menu</div>
+        <nav class="nav">
+            <button class="tab-btn active" onclick="switchTab('workout', this)"><span class="nav-icon">🏋️</span><span>Entraînement</span></button>
+            <button class="tab-btn" onclick="switchTab('nutrition', this)"><span class="nav-icon">🥗</span><span>Nutrition</span></button>
+            <button class="tab-btn" onclick="switchTab('shopping', this)"><span class="nav-icon">🛒</span><span>Courses</span></button>
+            <button class="tab-btn" onclick="switchTab('recipes', this)"><span class="nav-icon">🍲</span><span>Recettes</span></button>
+            <button class="tab-btn" onclick="switchTab('weight', this)"><span class="nav-icon">⚖️</span><span>Poids</span></button>
+        </nav>
+        <div class="sidebar-footer">
+            <strong>Objectif</strong><br>Construire du muscle et suivre son alimentation.
+        </div>
+    </aside>
+
+    <main class="main">
+        <div class="main-inner">
+            <header class="top-header">
+                <div>
+                    <h1 class="page-title">Mon Coach</h1>
+                    <p class="page-subtitle">Votre tableau de bord pour votre prise de masse.</p>
+                </div>
+                <div class="header-badge">● Objectif actif</div>
+            </header>
+
+            <!-- WORKOUT -->
+            <section id="workout" class="section active">
+                <div class="stats-grid">
+                    <div class="stat-card"><div class="stat-icon">🏋️</div><div class="stat-value">3</div><div class="stat-label">Séances / semaine</div></div>
+                    <div class="stat-card"><div class="stat-icon">🔥</div><div class="stat-value">Masse</div><div class="stat-label">Objectif actuel</div></div>
+                    <div class="stat-card"><div class="stat-icon">📈</div><div class="stat-value">Progression</div><div class="stat-label">Suivi régulier</div></div>
+                    <div class="stat-card"><div class="stat-icon">🎯</div><div class="stat-value">~2500</div><div class="stat-label">kcal / jour</div></div>
+                </div>
+                <div class="card">
+                    <h2>Programme de la semaine</h2>
+                    <p class="card-description">Modifiez directement les exercices et les séries.</p>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead><tr><th>Jour</th><th>Groupe</th><th>Exercices & séries</th></tr></thead>
+                            <tbody id="workoutTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- NUTRITION -->
+            <section id="nutrition" class="section">
+                <div class="stats-grid">
+                    <div class="stat-card"><div class="stat-icon">🔥</div><div class="stat-value">~2500</div><div class="stat-label">Calories quotidiennes</div></div>
+                    <div class="stat-card"><div class="stat-icon">🥩</div><div class="stat-value">Protéines</div><div class="stat-label">Priorité nutritionnelle</div></div>
+                    <div class="stat-card"><div class="stat-icon">🍽️</div><div class="stat-value">4</div><div class="stat-label">Repas / jour</div></div>
+                    <div class="stat-card"><div class="stat-icon">💧</div><div class="stat-value">Hydratation</div><div class="stat-label">À maintenir</div></div>
+                </div>
+                <div class="card">
+                    <h2>Plan nutritionnel</h2>
+                    <p class="card-description">Sélectionnez une journée puis modifiez vos repas.</p>
+                    <div class="day-selector" id="daySelector"></div>
+                    <div id="mealContainer"></div>
+                </div>
+            </section>
+
+            <!-- SHOPPING -->
+            <section id="shopping" class="section">
+                <div class="card">
+                    <h2>Courses & Stock</h2>
+                    <p class="card-description">Gérez votre liste de courses et vos produits favoris.</p>
+                    <div class="shopping-layout">
+                        <div><div id="shoppingListContainer"></div></div>
+                        <div class="stock-box">
+                            <h3>📦 Stock / Favoris</h3>
+                            <div class="stock-description">Ajoutez, modifiez, restaurez ou supprimez vos articles.</div>
+                            <div style="margin-bottom:12px;">
+                                <input type="text" id="stockSearchInput" placeholder="🔍 Rechercher..." oninput="renderShoppingAndStock()">
+                            </div>
+                            <div id="stockListContainer"></div>
+                            <div class="add-item-box">
+                                <input type="text" id="newItemInput" placeholder="Ajouter au stock...">
+                                <button onclick="addCustomItemToStock()">Ajouter</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RECIPES -->
+            <section id="recipes" class="section">
+                <div class="card">
+                    <h2>Plats équilibrés</h2>
+                    <p class="card-description">Recherchez un plat ou un ingrédient. Les fautes d'orthographe sont tolérées.</p>
+                    <div class="search-box">
+                        <input type="text" id="recipeSearchInput" placeholder="Rechercher un plat ou ingrédient..." oninput="renderRecipes()">
+                    </div>
+                    <div id="recipesContainer"></div>
+                    
+                    <div class="new-recipe-box">
+                        <h3>➕ Créer un nouveau plat</h3>
+                        <div style="display:flex; flex-direction:column; gap:10px;">
+                            <input type="text" id="newRecipeName" placeholder="Nom du plat...">
+                            <input type="text" id="newRecipeIngredients" placeholder="Ingrédients séparés par des virgules...">
+                            <div class="form-grid">
+                                <input type="number" id="newRecipeCalories" placeholder="Calories (kcal)">
+                                <input type="number" id="newRecipeProteins" placeholder="Protéines (g)">
+                            </div>
+                            <div>
+                                <label class="form-label">Photo du plat</label>
+                                <input type="file" id="newRecipeImageFile" accept="image/*">
+                                <input type="text" id="newRecipeImageUrl" placeholder="Ou coller un lien d'image..." style="margin-top:7px;">
+                            </div>
+                            <button class="btn-success-custom" onclick="addNewRecipe()" style="align-self:flex-start; padding:10px 17px;">
+                                Enregistrer ce nouveau plat
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- WEIGHT TRACKER -->
+            <section id="weight" class="section">
+                <div class="stats-grid">
+                    <div class="stat-card"><div class="stat-icon">⚖️</div><div class="stat-value" id="statCurrentWeight">-- kg</div><div class="stat-label">Poids actuel</div></div>
+                    <div class="stat-card"><div class="stat-icon">📈</div><div class="stat-value" id="statWeightDiff">-- kg</div><div class="stat-label">Variation totale</div></div>
+                    <div class="stat-card"><div class="stat-icon">🎯</div><div class="stat-value">Prise de masse</div><div class="stat-label">Cap suivi</div></div>
+                    <div class="stat-card"><div class="stat-icon">📊</div><div class="stat-value" id="statTotalEntries">0</div><div class="stat-label">Mesures enregistrées</div></div>
+                </div>
+
+                <div class="card">
+                    <h2>Évolution graphique</h2>
+                    <p class="card-description">Visualisez votre courbe de progression au fil du temps.</p>
+                    <div style="position: relative; height: 260px; width: 100%;">
+                        <canvas id="weightChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>Suivi du Poids</h2>
+                    <p class="card-description">Enregistrez régulièrement votre poids pour suivre l'évolution de votre prise de masse.</p>
+                    
+                    <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:25px;">
+                        <div class="form-grid">
+                            <div>
+                                <label class="form-label">Date</label>
+                                <input type="date" id="weightDate">
+                            </div>
+                            <div>
+                                <label class="form-label">Poids (kg)</label>
+                                <input type="number" step="0.1" id="weightValue" placeholder="ex: 72.5">
+                            </div>
+                        </div>
+                        <button class="btn-success-custom" onclick="addWeightEntry()" style="align-self:flex-start; padding:10px 17px;">
+                            Ajouter cette mesure
+                        </button>
+                    </div>
+
+                    <h3>Historique des pesées</h3>
+                    <div class="table-wrapper" style="margin-top:10px;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Poids</th>
+                                    <th>Évolution</th>
+                                    <th style="text-align:right;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="weightTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+</div>
+
+<script>
+/* =========================================================
+   GESTION DES NOTIFICATIONS (TOASTS)
+========================================================= */
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `<span>${type === 'success' ? '✅' : '⚠️'}</span> ${message}`;
+    container.appendChild(toast);
+    setTimeout(() => { toast.remove(); }, 3000);
+}
+
+/* =========================================================
+   COMPRESSION D'IMAGES
+========================================================= */
+function compressImage(file, callback) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            const MAX_WIDTH = 400;
+            const MAX_HEIGHT = 400;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height) {
+                if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+            } else {
+                if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            callback(canvas.toDataURL('image/jpeg', 0.7));
+        };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+/* =========================================================
+   DONNÉES INITIALES
+========================================================= */
+let workoutData = JSON.parse(localStorage.getItem('workoutData')) || [
+    { day: "Lundi", group: "Dos / Biceps", exercises: "Tractions (4x8) + Rowing (4x10) + Curl Biceps (3x12)" },
+    { day: "Mercredi", group: "Jambes / Abdos", exercises: "Squat (4x8) + Presse (3x10) + Crunchs (3x15)" },
+    { day: "Vendredi", group: "Pectoraux / Triceps", exercises: "Développé couché (4x8) + Dips (3x10) + Extensions (3x12)" }
+];
+
+let nutritionData = JSON.parse(localStorage.getItem('nutritionData')) || {
+    "Lundi": [
+        { repas: "Matin", desc: "Omelette (3 œufs) + 50g flocons d'avoine + 1 banane" },
+        { repas: "Midi", desc: "150g blanc de poulet + 200g riz cuit + légumes + huile d'olive" },
+        { repas: "Collation", desc: "1 skyr (150g) + 30g d'amandes + 1 pomme" },
+        { repas: "Soir", desc: "150g de saumon + 250g de patates douces + salade" }
+    ],
+    "Mardi": [
+        { repas: "Matin", desc: "Pancakes protéinés (œufs, avoine, banane) + beurre de cacahuète" },
+        { repas: "Midi", desc: "150g de dinde + 200g de quinoa + avocat + légumes" },
+        { repas: "Collation", desc: "Fromage blanc 0% + poignée de noix + fruits rouges" },
+        { repas: "Soir", desc: "Omelette + purée de pommes de terre + brocolis" }
+    ],
+    "Mercredi": [
+        { repas: "Matin", desc: "Bowl cake avoine/banane/œufs + 1 verre de lait" },
+        { repas: "Midi", desc: "Steak haché 5% (150g) + 200g de pâtes complètes + sauce tomate" },
+        { repas: "Collation", desc: "Pain complet + beurre de cacahuète + shake de protéines" },
+        { repas: "Soir", desc: "Filet de cabillaud + riz basmati + courgettes" }
+    ],
+    "Jeudi": [
+        { repas: "Matin", desc: "Porridge (flocons d'avoine, lait, skyr) + fruits" },
+        { repas: "Midi", desc: "150g de poulet + semoule (200g cuite) + ratatouille" },
+        { repas: "Collation", desc: "1 banane + 30g d'amandes + 1 yaourt grec" },
+        { repas: "Soir", desc: "Steak de bœuf + patates douces au four + haricots verts" }
+    ],
+    "Vendredi": [
+        { repas: "Matin", desc: "Muesli + fromage blanc + fruits frais" },
+        { repas: "Midi", desc: "Pavé de saumon + 200g de riz + épinards" },
+        { repas: "Collation", desc: "Skyr + fruits secs" },
+        { repas: "Soir", desc: "Blancs de poulet émincés + poêlée de légumes + nouilles" }
+    ],
+    "Samedi": [
+        { repas: "Matin", desc: "Pains perdus protéinés + fruits" },
+        { repas: "Midi", desc: "Bavette de bœuf + frites de patates douces maison" },
+        { repas: "Collation", desc: "Smoothie (lait, banane, beurre de cacahuète, avoine)" },
+        { repas: "Soir", desc: "Poisson blanc + purée de pommes de terre + brocolis" }
+    ],
+    "Dimanche": [
+        { repas: "Matin", desc: "Œufs brouillés sur toast complet + avocat" },
+        { repas: "Midi", desc: "Rôti de dinde + gratin de chou-fleur + riz" },
+        { repas: "Collation", desc: "Skyr + miel + noix de cajou" },
+        { repas: "Soir", desc: "Omelette aux champignons + salade verte + pain complet" }
+    ]
+};
+
+let shoppingList = JSON.parse(localStorage.getItem('shoppingList')) || [
+    { name: "Œufs (x30)", checked: false },
+    { name: "Flocons d'avoine (1 paquet)", checked: false },
+    { name: "Bananes & Fruits frais", checked: false },
+    { name: "Blancs de poulet / Dinde (1.5 kg)", checked: false },
+    { name: "Steaks hachés / Bœuf / Bavette", checked: false },
+    { name: "Saumon & Poisson blanc (Cabillaud)", checked: false },
+    { name: "Riz basmati / Pâtes complètes / Quinoa / Semoule", checked: false },
+    { name: "Patates douces & Pommes de terre", checked: false },
+    { name: "Légumes variés & Salade & Brocolis", checked: false },
+    { name: "Skyr & Fromage blanc 0%", checked: false },
+    { name: "Amandes, Noix & Beurre de cacahuète", checked: false },
+    { name: "Lait & Pain de mie complet", checked: false }
+];
+
+let stockList = JSON.parse(localStorage.getItem('stockList')) || [];
+
+let recipesData = JSON.parse(localStorage.getItem('recipesData')) || [
+    { name: "Poulet & Riz Basmati", ingredients: ["150g de blanc de poulet", "200g de riz basmati", "Légumes verts", "1 c. à s. d'huile d'olive"], calories: 650, proteins: 45, image: "" },
+    { name: "Bowl Cake Avoine Banane", ingredients: ["50g de flocons d'avoine", "1 banane", "1 œuf", "1 verre de lait"], calories: 450, proteins: 20, image: "" },
+    { name: "Pancakes Protéinés", ingredients: ["60g de flocons d'avoine", "2 œufs", "1 banane", "Beurre de cacahuète"], calories: 550, proteins: 25, image: "" },
+    { name: "Pâtes Complètes & Steak Haché", ingredients: ["150g de steak haché 5%", "200g de pâtes complètes", "Sauce tomate", "1 portion de légumes"], calories: 700, proteins: 40, image: "" },
+    { name: "Saumon & Patates Douces", ingredients: ["150g de pavé de saumon", "250g de patates douces", "Salade verte", "Huile d'olive"], calories: 700, proteins: 35, image: "" }
+];
+
+let weightData = JSON.parse(localStorage.getItem('weightData')) || [];
+let weightChartInstance = null;
+let currentDay = "Lundi";
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+function switchTab(tabId, button) {
+    document.querySelectorAll('.section').forEach(section => section.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    if (button) button.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Si on bascule sur l'onglet poids, redessiner le graphique (nécessaire pour Chart.js dans un conteneur masqué au départ)
+    if (tabId === 'weight' && weightChartInstance) {
+        weightChartInstance.update();
+    }
+}
+
+/* =========================================================
+   WORKOUT LOGIC
+========================================================= */
+function renderWorkout() {
+    const tbody = document.getElementById('workoutTableBody');
+    tbody.innerHTML = '';
+    workoutData.forEach((item, index) => {
+        tbody.innerHTML += `
+            <tr>
+                <td><span class="day-label">${item.day}</span></td>
+                <td><span class="group-label">${item.group}</span></td>
+                <td><input type="text" value="${item.exercises}" onchange="updateWorkout(${index}, this.value)"></td>
+            </tr>
+        `;
+    });
+}
+function updateWorkout(index, value) {
+    workoutData[index].exercises = value;
+    localStorage.setItem('workoutData', JSON.stringify(workoutData));
+    showToast("Programme mis à jour !");
+}
+
+/* =========================================================
+   NUTRITION LOGIC
+========================================================= */
+function renderNutritionDays() {
+    const selector = document.getElementById('daySelector');
+    selector.innerHTML = '';
+    Object.keys(nutritionData).forEach(day => {
+        const btn = document.createElement('button');
+        btn.className = `day-btn ${day === currentDay ? 'active' : ''}`;
+        btn.innerText = day;
+        btn.onclick = () => { currentDay = day; renderNutritionDays(); renderMeals(); };
+        selector.appendChild(btn);
+    });
+}
+
+function renderMeals() {
+    const container = document.getElementById('mealContainer');
+    container.innerHTML = `<h3 style="margin:0 0 13px; font-size:15px;">Menus pour : <span style="color:var(--primary-light);">${currentDay}</span></h3>`;
+    
+    nutritionData[currentDay].forEach((meal, index) => {
+        let icon = "🍽️";
+        if (meal.repas === "Matin") icon = "☀️";
+        if (meal.repas === "Midi") icon = "🍴";
+        if (meal.repas === "Collation") icon = "🍌";
+        if (meal.repas === "Soir") icon = "🌙";
+
+        container.innerHTML += `
+            <div class="meal-box">
+                <div class="meal-title"><div class="meal-icon">${icon}</div>${meal.repas}</div>
+                <input type="text" value="${meal.desc}" onchange="updateMeal('${currentDay}', ${index}, this.value)">
+            </div>
+        `;
+    });
+}
+
+function updateMeal(day, index, newValue) {
+    nutritionData[day][index].desc = newValue;
+    localStorage.setItem('nutritionData', JSON.stringify(nutritionData));
+    showToast("Repas enregistré !");
+}
+
+/* =========================================================
+   SHOPPING & STOCK LOGIC
+========================================================= */
+function renderShoppingAndStock() {
+    const shoppingContainer = document.getElementById('shoppingListContainer');
+    shoppingContainer.innerHTML = '';
+
+    if (shoppingList.length === 0) {
+        shoppingContainer.innerHTML = `<div style="text-align:center; padding:35px 10px; color:var(--text-muted);"><div style="font-size:30px; margin-bottom:10px;">🛒</div>Votre liste de courses est vide.</div>`;
+    } else {
+        shoppingList.forEach((item, index) => {
+            shoppingContainer.innerHTML += `
+                <div class="shopping-item ${item.checked ? 'checked' : ''}">
+                    <div class="shopping-left">
+                        <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleShoppingItem(${index})">
+                        <span>${item.name}</span>
+                    </div>
+                    <button class="action-btn delete-btn" onclick="moveToStock(${index})" title="Mettre dans le stock">📦</button>
+                </div>
+            `;
+        });
+    }
+
+    const stockContainer = document.getElementById('stockListContainer');
+    const stockSearchInput = document.getElementById('stockSearchInput');
+    const stockQuery = stockSearchInput ? stockSearchInput.value.trim() : "";
+    stockContainer.innerHTML = '';
+
+    const filteredStock = stockList.filter(item => stockQuery === "" || fuzzyMatch(item, stockQuery));
+
+    if (filteredStock.length === 0) {
+        stockContainer.innerHTML = `<p style="font-size:11px; color:var(--text-muted); text-align:center; padding:10px;">Aucun favori trouvé</p>`;
+    } else {
+        filteredStock.forEach(item => {
+            const realIndex = stockList.indexOf(item);
+            stockContainer.innerHTML += `
+                <div class="stock-item">
+                    <div class="stock-left"><input type="text" value="${item}" onchange="updateStockItem(${realIndex}, this.value)" style="padding:7px; font-size:11px;"></div>
+                    <div class="stock-actions">
+                        <button class="action-btn add-stock-btn" onclick="moveToList(${realIndex})" title="Remettre dans la liste">➕</button>
+                        <button class="action-btn delete-btn" onclick="deleteFromStock(${realIndex}, '${item.replace(/'/g, "\\'")}')" title="Supprimer">❌</button>
+                    </div>
+                </div>
+            `;
+        });
+    }
+}
+
+function toggleShoppingItem(index) {
+    shoppingList[index].checked = !shoppingList[index].checked;
+    localStorage.setItem('shoppingList', JSON.stringify(shoppingList));
+    renderShoppingAndStock();
+}
+
+function updateStockItem(index, newValue) {
+    if (newValue.trim() !== '') {
+        stockList[index] = newValue.trim();
+        localStorage.setItem('stockList', JSON.stringify(stockList));
+        showToast("Stock mis à jour !");
+    }
+}
+
+function moveToStock(index) {
+    const removedItem = shoppingList.splice(index, 1)[0];
+    stockList.push(removedItem.name);
+    localStorage.setItem('shoppingList', JSON.stringify(shoppingList));
+    localStorage.setItem('stockList', JSON.stringify(stockList));
+    renderShoppingAndStock();
+}
+
+function moveToList(index) {
+    const restoredItem = stockList.splice(index, 1)[0];
+    shoppingList.push({ name: restoredItem, checked: false });
+    localStorage.setItem('shoppingList', JSON.stringify(shoppingList));
+    localStorage.setItem('stockList', JSON.stringify(stockList));
+    renderShoppingAndStock();
+}
+
+function deleteFromStock(index, itemName) {
+    stockList.splice(index, 1);
+    localStorage.setItem('stockList', JSON.stringify(stockList));
+    renderShoppingAndStock();
+    showToast(`"${itemName}" supprimé des favoris.`, 'error');
+}
+
+function addCustomItemToStock() {
+    const input = document.getElementById('newItemInput');
+    if (input.value.trim() !== '') {
+        stockList.push(input.value.trim());
+        localStorage.setItem('stockList', JSON.stringify(stockList));
+        input.value = '';
+        renderShoppingAndStock();
+        showToast("Article ajouté au stock !");
+    }
+}
+
+/* =========================================================
+   RECHERCHE FLOUSE (LEVENSHTEIN)
+========================================================= */
+function getLevenshteinDistance(a, b) {
+    const matrix = [];
+    for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+    for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+    for (let i = 1; i <= b.length; i++) {
+        for (let j = 1; j <= a.length; j++) {
+            if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                matrix[i][j] = matrix[i - 1][j - 1];
+            } else {
+                matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j] + 1);
+            }
+        }
+    }
+    return matrix[b.length][a.length];
+}
+
+function fuzzyMatch(text, query) {
+    text = text.toLowerCase();
+    query = query.toLowerCase();
+    if (text.includes(query)) return true;
+    const words = text.split(/\s+/);
+    const queryWords = query.split(/\s+/);
+    for (let qw of queryWords) {
+        if (qw.length < 2) continue;
+        let matched = false;
+        for (let w of words) {
+            const allowedErrors = qw.length <= 4 ? 1 : 2;
+            if (getLevenshteinDistance(w, qw) <= allowedErrors || w.includes(qw)) {
+                matched = true;
+                break;
+            }
+        }
+        if (!matched) return false;
+    }
+    return true;
+}
+
+/* =========================================================
+   RECIPES LOGIC
+========================================================= */
+function toggleRecipeInfo(realIndex) {
+    const panel = document.getElementById(`recipe_info_${realIndex}`);
+    if (panel) panel.classList.toggle('active');
+}
+
+function updateRecipeField(realIndex, field, value) {
+    recipesData[realIndex][field] = value;
+    localStorage.setItem('recipesData', JSON.stringify(recipesData));
+    showToast("Paramètre de recette mis à jour !");
+}
+
+function renderRecipes() {
+    const container = document.getElementById('recipesContainer');
+    const searchInput = document.getElementById('recipeSearchInput');
+    const query = searchInput ? searchInput.value.trim() : "";
+    container.innerHTML = '';
+
+    const filteredRecipes = recipesData.filter(recipe => {
+        if (query === "") return true;
+        if (fuzzyMatch(recipe.name, query)) return true;
+        for (let ing of recipe.ingredients) {
+            if (fuzzyMatch(ing, query)) return true;
+        }
+        return false;
+    });
+
+    if (filteredRecipes.length === 0) {
+        container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted);">Aucun plat trouvé pour "<strong>${query}</strong>".</div>`;
+        return;
+    }
+
+    filteredRecipes.forEach(recipe => {
+        const realIndex = recipesData.indexOf(recipe);
+        let ingredientsHtml = '';
+        recipe.ingredients.forEach((ing, ingIndex) => {
+            ingredientsHtml += `
+                <div class="recipe-ing-item">
+                    <input type="checkbox" id="rec_${realIndex}_ing_${ingIndex}" checked>
+                    <label for="rec_${realIndex}_ing_${ingIndex}">${ing}</label>
+                </div>
+            `;
+        });
+
+        const cal = recipe.calories || 0;
+        const prot = recipe.proteins || 0;
+        const imgHtml = recipe.image ? `<img src="${recipe.image}" alt="${recipe.name}">` : `<div class="recipe-image-placeholder">🍽️<br><br>Aucune photo</div>`;
+
+        container.innerHTML += `
+            <div class="recipe-card">
+                <div class="recipe-image-container">${imgHtml}</div>
+                <div class="recipe-content">
+                    <div class="recipe-header">
+                        <div class="recipe-title">🍽️ ${recipe.name}</div>
+                        <button class="btn-info-custom" onclick="toggleRecipeInfo(${realIndex})">ℹ️ Infos</button>
+                    </div>
+                    <div id="recipe_info_${realIndex}" class="recipe-info-panel">
+                        <strong>📊 Paramètres & Nutrition</strong>
+                        <div style="display:flex; gap:10px; margin-top:10px; align-items:center; flex-wrap:wrap;">
+                            <div><label>Calories :</label> <input type="number" value="${cal}" onchange="updateRecipeField(${realIndex}, 'calories', Number(this.value))" style="width:80px; padding:6px;"></div>
+                            <div><label>Protéines :</label> <input type="number" value="${prot}" onchange="updateRecipeField(${realIndex}, 'proteins', Number(this.value))" style="width:80px; padding:6px;"></div>
+                            <div style="width:100%;"><label>Lien image :</label> <input type="text" value="${recipe.image || ''}" placeholder="https://..." onchange="updateRecipeField(${realIndex}, 'image', this.value); renderRecipes();"></div>
+                        </div>
+                    </div>
+                    <div class="recipe-ingredients">${ingredientsHtml}</div>
+                    <div class="recipe-buttons">
+                        <button class="btn-primary-custom" onclick="addAllRecipeIngredients(${realIndex})">➕ Ajouter tout le plat</button>
+                        <button class="btn-success-custom" onclick="addSelectedRecipeIngredients(${realIndex})">✅ Ajouter les cochés</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+}
+
+function addAllRecipeIngredients(recipeIndex) {
+    const recipe = recipesData[recipeIndex];
+    recipe.ingredients.forEach(ing => { shoppingList.push({ name: ing, checked: false }); });
+    localStorage.setItem('shoppingList', JSON.stringify(shoppingList));
+    renderShoppingAndStock();
+    showToast(`Ingrédients de "${recipe.name}" ajoutés !`);
+}
+
+function addSelectedRecipeIngredients(recipeIndex) {
+    const recipe = recipesData[recipeIndex];
+    let addedCount = 0;
+    recipe.ingredients.forEach((ing, ingIndex) => {
+        const checkbox = document.getElementById(`rec_${recipeIndex}_ing_${ingIndex}`);
+        if (checkbox && checkbox.checked) {
+            shoppingList.push({ name: ing, checked: false });
+            addedCount++;
+        }
+    });
+    localStorage.setItem('shoppingList', JSON.stringify(shoppingList));
+    renderShoppingAndStock();
+    showToast(`${addedCount} ingrédient(s) ajouté(s) à la liste !`);
+}
+
+function addNewRecipe() {
+    const nameInput = document.getElementById('newRecipeName');
+    const ingInput = document.getElementById('newRecipeIngredients');
+    const calInput = document.getElementById('newRecipeCalories');
+    const protInput = document.getElementById('newRecipeProteins');
+    const fileInput = document.getElementById('newRecipeImageFile');
+    const urlInput = document.getElementById('newRecipeImageUrl');
+
+    const name = nameInput.value.trim();
+    const ingString = ingInput.value.trim();
+    const calories = Number(calInput.value) || 0;
+    const proteins = Number(protInput.value) || 0;
+
+    if (name !== '' && ingString !== '') {
+        const ingredients = ingString.split(',').map(item => item.trim()).filter(item => item !== '');
+
+        const finalizeSave = (imgUrl) => {
+            recipesData.push({ name, ingredients, calories, proteins, image: imgUrl });
+            localStorage.setItem('recipesData', JSON.stringify(recipesData));
+            
+            nameInput.value = ''; ingInput.value = ''; calInput.value = ''; protInput.value = ''; fileInput.value = ''; urlInput.value = '';
+            renderRecipes();
+            showToast(`Le plat "${name}" a été enregistré !`);
+        };
+
+        if (urlInput.value.trim() !== '') {
+            finalizeSave(urlInput.value.trim());
+        } else if (fileInput.files && fileInput.files[0]) {
+            compressImage(fileInput.files[0], (compressedDataUrl) => {
+                finalizeSave(compressedDataUrl);
+            });
+        } else {
+            finalizeSave("");
+        }
+    } else {
+        showToast("Veuillez remplir le nom du plat et au moins un ingrédient.", "error");
+    }
+}
+
+/* =========================================================
+   WEIGHT TRACKER & CHART LOGIC
+========================================================= */
+function renderWeightTracker() {
+    // Trier l'historique pour le tableau (du plus récent au plus ancien)
+    const sortedDesc = [...weightData].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    const tbody = document.getElementById('weightTableBody');
+    tbody.innerHTML = '';
+
+    const statCurrent = document.getElementById('statCurrentWeight');
+    const statDiff = document.getElementById('statWeightDiff');
+    const statEntries = document.getElementById('statTotalEntries');
+
+    statEntries.innerText = weightData.length;
+
+    if (weightData.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">Aucune pesée enregistrée.</td></tr>`;
+        statCurrent.innerText = "-- kg";
+        statDiff.innerText = "-- kg";
+        updateWeightChart([]);
+        return;
+    }
+
+    // Le plus récent (basé sur le tri décroissant)
+    const latestWeight = sortedDesc[0].weight;
+    // Le plus ancien (basé sur le tri chronologique)
+    const sortedAsc = [...weightData].sort((a, b) => new Date(a.date) - new Date(b.date));
+    const oldestWeight = sortedAsc[0].weight;
+    const diff = (latestWeight - oldestWeight).toFixed(1);
+
+    statCurrent.innerText = `${latestWeight} kg`;
+    statDiff.innerHTML = `<span style="color:${diff >= 0 ? 'var(--success)' : 'var(--danger)'};">${diff > 0 ? '+' : ''}${diff} kg</span>`;
+
+    sortedDesc.forEach((entry, index) => {
+        let diffStr = "-";
+        if (index < sortedDesc.length - 1) {
+            const prevWeight = sortedDesc[index + 1].weight;
+            const stepDiff = (entry.weight - prevWeight).toFixed(1);
+            diffStr = `<span style="color:${stepDiff >= 0 ? 'var(--success)' : 'var(--danger)'};">${stepDiff > 0 ? '+' : ''}${stepDiff} kg</span>`;
+        }
+
+        tbody.innerHTML += `
+            <tr>
+                <td><span class="day-label">${entry.date}</span></td>
+                <td><strong>${entry.weight} kg</strong></td>
+                <td>${diffStr}</td>
+                <td style="text-align:right;">
+                    <button class="action-btn delete-btn" onclick="deleteWeightEntry('${entry.date}')" title="Supprimer">❌</button>
+                </td>
+            </tr>
+        `;
+    });
+
+    // Mettre à jour le graphique avec les données triées chronologiquement
+    updateWeightChart(sortedAsc);
+}
+
+function updateWeightChart(dataArray) {
+    const ctx = document.getElementById('weightChart').getContext('2d');
+    
+    const labels = dataArray.map(item => item.date);
+    const weights = dataArray.map(item => item.weight);
+
+    if (weightChartInstance) {
+        weightChartInstance.destroy();
+    }
+
+    weightChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Poids (kg)',
+                data: weights,
+                borderColor: '#5b8cff',
+                backgroundColor: 'rgba(91, 140, 255, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.3,
+                pointBackgroundColor: '#5b8cff',
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                x: {
+                    grid: { color: 'rgba(37, 43, 56, 0.5)' },
+                    ticks: { color: '#8992a4', font: { family: 'Inter', size: 11 } }
+                },
+                y: {
+                    grid: { color: 'rgba(37, 43, 56, 0.5)' },
+                    ticks: { color: '#8992a4', font: { family: 'Inter', size: 11 } }
+                }
+            }
+        }
+    });
+}
+
+function addWeightEntry() {
+    const dateInput = document.getElementById('weightDate');
+    const valInput = document.getElementById('weightValue');
+
+    const date = dateInput.value;
+    const weight = Number(valInput.value);
+
+    if (date && weight > 0) {
+        const existingIndex = weightData.findIndex(item => item.date === date);
+        if (existingIndex !== -1) {
+            weightData[existingIndex].weight = weight;
+        } else {
+            weightData.push({ date, weight });
+        }
+
+        localStorage.setItem('weightData', JSON.stringify(weightData));
+        valInput.value = '';
+        renderWeightTracker();
+        showToast("Pesée enregistrée avec succès !");
+    } else {
+        showToast("Veuillez renseigner une date valide et un poids correct.", "error");
+    }
+}
+
+function deleteWeightEntry(dateStr) {
+    weightData = weightData.filter(item => item.date !== dateStr);
+    localStorage.setItem('weightData', JSON.stringify(weightData));
+    renderWeightTracker();
+    showToast("Pesée supprimée.", "error");
+}
+
+// Initialiser la date du jour par défaut
+document.getElementById('weightDate').valueAsDate = new Date();
+
+/* =========================================================
+   INITIALISATION
+========================================================= */
+renderWorkout();
+renderNutritionDays();
+renderMeals();
+renderShoppingAndStock();
+renderRecipes();
+renderWeightTracker();
+</script>
+
+</body>
+</html>
