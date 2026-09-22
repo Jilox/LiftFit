@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mon Coach — Prise de Masse</title>
+<title>MassFit — Prise de Masse</title>
 <!-- Importation de Chart.js pour la courbe -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -183,12 +183,12 @@ html, body {
 .stat-label { color: var(--text-light); font-size: 11px; margin-top: 4px; }
 
 /* =========================================================
-   TABLES & INPUTS
+   TABLES & INPUTS (CORRECTION RESPONSIVE)
 ========================================================= */
-.table-wrapper { overflow-x: auto; }
-table { width: 100%; border-collapse: separate; border-spacing: 0 7px; min-width: 450px; }
-th { color: var(--text-muted); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; padding: 7px 13px; text-align: left; }
-td { padding: 14px 13px; background: #10141c; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); font-size: 13px; }
+.table-wrapper { width: 100%; overflow-x: auto; }
+table { width: 100%; border-collapse: separate; border-spacing: 0 7px; }
+th { color: var(--text-muted); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; padding: 7px 10px; text-align: left; }
+td { padding: 12px 10px; background: #10141c; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); font-size: 13px; }
 td:first-child { border-left: 1px solid var(--border); border-radius: 11px 0 0 11px; }
 td:last-child { border-right: 1px solid var(--border); border-radius: 0 11px 11px 0; }
 .day-label { font-weight: 800; color: var(--primary-light); }
@@ -299,7 +299,7 @@ input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(91,140,25
     <aside class="sidebar">
         <div class="logo">
             <div class="logo-icon">💪</div>
-            <div class="logo-text">MON COACH<span>PRISE DE MASSE</span></div>
+            <div class="logo-text">MASSFIT<span>PRISE DE MASSE</span></div>
         </div>
         <div class="nav-title">Menu</div>
         <nav class="nav">
@@ -318,7 +318,7 @@ input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(91,140,25
         <div class="main-inner">
             <header class="top-header">
                 <div>
-                    <h1 class="page-title">Mon Coach</h1>
+                    <h1 class="page-title">MassFit</h1>
                     <p class="page-subtitle">Votre tableau de bord pour votre prise de masse.</p>
                 </div>
                 <div class="header-badge">● Objectif actif</div>
@@ -609,7 +609,6 @@ function switchTab(tabId, button) {
     if (button) button.classList.add('active');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    // Si on bascule sur l'onglet poids, redessiner le graphique (nécessaire pour Chart.js dans un conteneur masqué au départ)
     if (tabId === 'weight' && weightChartInstance) {
         weightChartInstance.update();
     }
@@ -775,7 +774,7 @@ function addCustomItemToStock() {
 }
 
 /* =========================================================
-   RECHERCHE FLOUSE (LEVENSHTEIN)
+   RECHERCHE FLOUE (LEVENSHTEIN)
 ========================================================= */
 function getLevenshteinDistance(a, b) {
     const matrix = [];
@@ -957,7 +956,6 @@ function addNewRecipe() {
    WEIGHT TRACKER & CHART LOGIC
 ========================================================= */
 function renderWeightTracker() {
-    // Trier l'historique pour le tableau (du plus récent au plus ancien)
     const sortedDesc = [...weightData].sort((a, b) => new Date(b.date) - new Date(a.date));
 
     const tbody = document.getElementById('weightTableBody');
@@ -977,9 +975,7 @@ function renderWeightTracker() {
         return;
     }
 
-    // Le plus récent (basé sur le tri décroissant)
     const latestWeight = sortedDesc[0].weight;
-    // Le plus ancien (basé sur le tri chronologique)
     const sortedAsc = [...weightData].sort((a, b) => new Date(a.date) - new Date(b.date));
     const oldestWeight = sortedAsc[0].weight;
     const diff = (latestWeight - oldestWeight).toFixed(1);
@@ -1007,7 +1003,6 @@ function renderWeightTracker() {
         `;
     });
 
-    // Mettre à jour le graphique avec les données triées chronologiquement
     updateWeightChart(sortedAsc);
 }
 
@@ -1089,7 +1084,6 @@ function deleteWeightEntry(dateStr) {
     showToast("Pesée supprimée.", "error");
 }
 
-// Initialiser la date du jour par défaut
 document.getElementById('weightDate').valueAsDate = new Date();
 
 /* =========================================================
