@@ -183,14 +183,15 @@ html, body {
 .stat-label { color: var(--text-light); font-size: 11px; margin-top: 4px; }
 
 /* =========================================================
-   TABLES & INPUTS (CORRECTION RESPONSIVE)
+   TABLES & INPUTS
 ========================================================= */
 .table-wrapper { width: 100%; overflow-x: auto; }
-table { width: 100%; border-collapse: separate; border-spacing: 0 7px; }
-th { color: var(--text-muted); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; padding: 7px 10px; text-align: left; }
-td { padding: 12px 10px; background: #10141c; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); font-size: 13px; }
-td:first-child { border-left: 1px solid var(--border); border-radius: 11px 0 0 11px; }
-td:last-child { border-right: 1px solid var(--border); border-radius: 0 11px 11px 0; }
+table { width: 100%; border-collapse: separate; border-spacing: 0 7px; min-width: 650px; }
+th { color: var(--text-muted); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; padding: 7px 12px; text-align: left; }
+td { padding: 14px 12px; background: #10141c; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); font-size: 13px; }
+td:first-child { border-left: 1px solid var(--border); border-radius: 11px 0 0 11px; width: 15%; }
+td:nth-child(2) { width: 25%; }
+td:last-child { border-right: 1px solid var(--border); border-radius: 0 11px 11px 0; width: 60%; }
 .day-label { font-weight: 800; color: var(--primary-light); }
 .group-label { color: var(--text-light); }
 
